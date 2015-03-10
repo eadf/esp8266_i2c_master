@@ -16,4 +16,14 @@ bool i2c_master_checkAck(void);
 void i2c_master_send_ack(void);
 void i2c_master_send_nack(void);
 
+/**
+ * Reads a given register
+ */
+bool i2c_master_readRegister(uint8_t deviceAddr, uint8_t regAddr, uint8_t *regValue);
+
+/**
+ * Writes a given register
+ */
+bool i2c_master_writeRegister(uint8_t deviceAddr, uint8_t regAddr, uint8_t regValue);
+
 #endif

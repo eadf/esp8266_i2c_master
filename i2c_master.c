@@ -420,3 +420,31 @@ i2c_master_writeByte(uint8 wrdata)
         i2c_master_wait(5);
     }
 }
+
+/******************************************************************************
+ * FunctionName : i2c_master_readRegister
+ * Description  : Reads a given register
+ * Parameters   : deviceAddr the address of the device [0-7]
+ * Parameters   : regAddr the register to read
+ * Parameters   : regValue the address where the result will be stored
+ * Returns      : ACK/NACK status
+ *******************************************************************************/
+bool ICACHE_FLASH_ATTR
+i2c_master_readRegister(uint8_t deviceAddr, uint8_t regAddr, uint8_t *regValue) {
+  // not implemented yet
+  return false;
+}
+
+/******************************************************************************
+ * FunctionName : i2c_master_writeRegister
+ * Description  : Writes a given register
+ * Parameters   : deviceAddr the address of the device [0-7]
+ * Parameters   : regAddr the register to read
+ * Parameters   : regValue the register value
+ * Returns      : ACK/NACK status
+ *******************************************************************************/
+bool ICACHE_FLASH_ATTR
+i2c_master_writeRegister(uint8_t deviceAddr, uint8_t regAddr, uint8_t regValue) {
+  // not implemented yet
+  return false;
+}
