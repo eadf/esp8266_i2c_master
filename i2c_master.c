@@ -23,6 +23,12 @@
 #define I2C_MASTER_SCL_GPIO 12
 #endif
 
+#ifndef I2C_MASTER_HALF_CYCLE
+#define I2C_MASTER_HALF_CYCLE 5
+#elif I2C_MASTER_HALF_CYCLE < 3
+#define I2C_MASTER_HALF_CYCLE 3
+#endif
+
 #if I2C_MASTER_SDA_GPIO == I2C_MASTER_SCL_GPIO
 #error "I2C_MASTER_SDA_GPIO can't be equal to I2C_MASTER_SCL_GPIO"
 #endif
@@ -177,20 +183,20 @@ i2c_master_init(void)
     uint8_t i;
 
     i2c_master_setDC(1, 0);
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
 
     // when SCL = 0, toggle SDA to clear up
     i2c_master_setDC(0, 0) ;
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
     i2c_master_setDC(1, 0) ;
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
 
     // set data_cnt to max value
     for (i = 0; i < 28; i++) {
         i2c_master_setDC(1, 0);
-        i2c_master_wait(5);	// sda 1, scl 0
+        i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 1, scl 0
         i2c_master_setDC(1, 1);
-        i2c_master_wait(5);	// sda 1, scl 1
+        i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 1, scl 1
     }
 
     // reset all
@@ -237,11 +243,11 @@ void ICACHE_FLASH_ATTR
 i2c_master_start(void)
 {
     i2c_master_setDC(1, m_nLastSCL);
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
     i2c_master_setDC(1, 1);
-    i2c_master_wait(5);	// sda 1, scl 1
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 1, scl 1
     i2c_master_setDC(0, 1);
-    i2c_master_wait(5);	// sda 0, scl 1
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 0, scl 1
 }
 
 /******************************************************************************
@@ -253,14 +259,14 @@ i2c_master_start(void)
 void ICACHE_FLASH_ATTR
 i2c_master_stop(void)
 {
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
 
     i2c_master_setDC(0, m_nLastSCL);
-    i2c_master_wait(5);	// sda 0
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 0
     i2c_master_setDC(0, 1);
-    i2c_master_wait(5);	// sda 0, scl 1
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 0, scl 1
     i2c_master_setDC(1, 1);
-    i2c_master_wait(5);	// sda 1, scl 1
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 1, scl 1
 }
 
 /******************************************************************************
@@ -273,15 +279,15 @@ void ICACHE_FLASH_ATTR
 i2c_master_setAck(uint8_t level)
 {
     i2c_master_setDC(m_nLastSDA, 0);
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
     i2c_master_setDC(level, 0);
-    i2c_master_wait(5);	// sda level, scl 0
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda level, scl 0
     i2c_master_setDC(level, 1);
     i2c_master_wait(8);	// sda level, scl 1
     i2c_master_setDC(level, 0);
-    i2c_master_wait(5);	// sda level, scl 0
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda level, scl 0
     i2c_master_setDC(1, 0);
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
 }
 
 /******************************************************************************
@@ -295,16 +301,16 @@ i2c_master_getAck(void)
 {
     uint8_t retVal;
     i2c_master_setDC(m_nLastSDA, 0);
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
     i2c_master_setDC(1, 0);
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
     i2c_master_setDC(1, 1);
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
 
     retVal = i2c_master_getDC();
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
     i2c_master_setDC(1, 0);
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
 
     return retVal;
 }
@@ -360,22 +366,22 @@ i2c_master_readByte(void)
     uint8_t retVal = 0;
     uint8_t k, i;
 
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
     i2c_master_setDC(m_nLastSDA, 0);
-    i2c_master_wait(5);	// sda 1, scl 0
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 1, scl 0
 
     for (i = 0; i < 8; i++) {
-        i2c_master_wait(5);
+        i2c_master_wait(I2C_MASTER_HALF_CYCLE);
         i2c_master_setDC(1, 0);
-        i2c_master_wait(5);	// sda 1, scl 0
+        i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 1, scl 0
         i2c_master_setDC(1, 1);
-        i2c_master_wait(5);	// sda 1, scl 1
+        i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 1, scl 1
 
         k = i2c_master_getDC();
-        i2c_master_wait(5);
+        i2c_master_wait(I2C_MASTER_HALF_CYCLE);
 
         if (i == 7) {
-            i2c_master_wait(3);   ////
+          i2c_master_wait(I2C_MASTER_HALF_CYCLE-2);   ////
         }
 
         k <<= (7 - i);
@@ -383,7 +389,7 @@ i2c_master_readByte(void)
     }
 
     i2c_master_setDC(1, 0);
-    i2c_master_wait(5);	// sda 1, scl 0
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);	// sda 1, scl 0
 
     return retVal;
 }
@@ -400,24 +406,24 @@ i2c_master_writeByte(uint8_t wrdata)
     uint8_t dat;
     sint8 i;
 
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
 
     i2c_master_setDC(m_nLastSDA, 0);
-    i2c_master_wait(5);
+    i2c_master_wait(I2C_MASTER_HALF_CYCLE);
 
     for (i = 7; i >= 0; i--) {
         dat = wrdata >> i;
         i2c_master_setDC(dat, 0);
-        i2c_master_wait(5);
+        i2c_master_wait(I2C_MASTER_HALF_CYCLE);
         i2c_master_setDC(dat, 1);
-        i2c_master_wait(5);
+        i2c_master_wait(I2C_MASTER_HALF_CYCLE);
 
         if (i == 0) {
-            i2c_master_wait(3);   ////
+          i2c_master_wait(I2C_MASTER_HALF_CYCLE-2);   ////
         }
 
         i2c_master_setDC(dat, 0);
-        i2c_master_wait(5);
+        i2c_master_wait(I2C_MASTER_HALF_CYCLE);
     }
 }
 
