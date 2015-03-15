@@ -496,3 +496,42 @@ i2c_master_writeRegister(uint8_t deviceAddr, uint8_t regAddr, uint8_t regValue) 
     }
   }
 }
+
+/******************************************************************************
+ * FunctionName : i2c_master_writeRegister16
+ * Description  : Writes a given 16bit register
+ * Parameters   : deviceAddr the address of the device (unshifted [0..0x7f])
+ * Parameters   : regAddr the register to read
+ * Parameters   : regValue the register value
+ * Parameters   : hbf high byte first
+ * Returns      : ACK/NACK status
+ *******************************************************************************/
+bool ICACHE_FLASH_ATTR
+i2c_master_writeRegister16(uint8_t deviceAddr, uint8_t regAddr, uint16_t regValue, bool hbf) {
+  i2c_master_start();
+  i2c_master_writeByte(deviceAddr<<1);
+  if (!i2c_master_checkAck()) {
+    // NACK
+    i2c_master_stop();
+    return false;
+  } else {
+    i2c_master_writeByte(regAddr);
+    if (!i2c_master_checkAck()) {
+      // NACK
+      i2c_master_stop();
+      return false;
+    } else {
+      i2c_master_writeByte(hbf?regValue>>8:regValue);
+      if (!i2c_master_checkAck()) {
+        // NACK
+        i2c_master_stop();
+        return false;
+      } else {
+        i2c_master_writeByte(hbf?regValue:regValue>>8);
+        bool rv = i2c_master_checkAck();
+        i2c_master_stop();
+        return rv;
+      }
+    }
+  }
+}
